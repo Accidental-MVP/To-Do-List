@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Todo List</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Include date picker library -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
+</head>
+<body class="light-theme">
+    <header>
+        <h1>Task Master</h1>
+        <div class="header-controls">
+            <button id="themeToggle"><i class="fas fa-moon"></i></button>
+            <button id="addTaskBtn"><i class="fas fa-plus"></i> New Task</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="filters">
+                <h3>Filters</h3>
+                <div class="filter-group">
+                    <input type="text" id="searchTask" placeholder="Search tasks...">
+                </div>
+                <div class="filter-group">
+                    <h4>Categories</h4>
+                    <div id="categoryList">
+                        <button class="category-btn active" data-category="all">
+                            <span class="category-color" style="background-color: #808080"></span>
+                            All
+                        </button>
+                    </div>
+                    <button id="addCategoryBtn"><i class="fas fa-plus"></i> Add Category</button>
+                </div>
+                <div class="filter-group">
+                    <h4>Priority</h4>
+                    <select id="priorityFilter">
+                        <option value="all">All Priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="kanban-board">
+                <div class="kanban-column" id="todoColumn">
+                    <h2>To Do</h2>
+                    <div class="task-list" data-status="todo"></div>
+                </div>
+                <div class="kanban-column" id="inProgressColumn">
+                    <h2>In Progress</h2>
+                    <div class="task-list" data-status="inProgress"></div>
+                </div>
+                <div class="kanban-column" id="completedColumn">
+                    <h2>Completed</h2>
+                    <div class="task-list" data-status="completed"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Task</h2>
+            <form id="taskForm">
+                <input type="text" id="taskTitle" name="taskTitle" placeholder="Task Title" required>
+                <textarea id="taskDescription" name="taskDescription" placeholder="Task Description"></textarea>
+                
+                <div class="form-group">
+                    <label>Category:</label>
+                    <select id="taskCategory" name="taskCategory" required>
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="shopping">Shopping</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Priority:</label>
+                    <select id="taskPriority" name="taskPriority" required>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Due Date:</label>
+                    <input type="text" id="taskDueDate" name="taskDueDate" class="flatpickr" placeholder="Select Date">
+                </div>
+
+                <div class="form-group">
+                    <label>Recurrence:</label>
+                    <select id="taskRecurrence" name="taskRecurrence">
+                        <option value="none">None</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Attachments:</label>
+                    <input type="file" id="taskAttachment" name="taskAttachment" multiple>
+                </div>
+
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Category</h2>
+            <form id="categoryForm">
+                <div class="form-group">
+                    <label>Category Name:</label>
+                    <input type="text" id="categoryName" name="categoryName" placeholder="Enter category name" required>
+                </div>
+                <div class="form-group">
+                    <label>Category Color:</label>
+                    <input type="color" id="categoryColor" name="categoryColor" value="#ff0000">
+                </div>
+                <button type="submit">Add Category</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="script.js"></script>
+</body>
+</html>
