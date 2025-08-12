@@ -11,6 +11,7 @@ class Task {
         this.attachments = attachments;
         this.status = status;
         this.createdAt = new Date();
+        this.orderIndex = 0;
     }
 }
 
@@ -67,6 +68,13 @@ class TodoApp {
         this.searchInput = document.getElementById('searchTask');
         this.categoryFilter = document.getElementById('categoryList');
         this.priorityFilter = document.getElementById('priorityFilter');
+        this.dueFilter = document.getElementById('dueFilter');
+
+        // Views
+        this.kanbanView = document.getElementById('kanbanView');
+        this.calendarView = document.getElementById('calendar');
+        this.kanbanViewBtn = document.getElementById('kanbanViewBtn');
+        this.calendarViewBtn = document.getElementById('calendarViewBtn');
     }
 
     // Initialize event listeners
@@ -92,17 +100,24 @@ class TodoApp {
         // Search and filters
         this.searchInput.addEventListener('input', () => this.filterTasks());
         this.categoryFilter.addEventListener('click', (e) => {
-            if (e.target.classList.contains('category-btn')) {
-                // Remove active class from all buttons
-                this.categoryFilter.querySelectorAll('.category-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                // Add active class to clicked button
-                e.target.classList.add('active');
-                this.filterTasks();
-            }
+            const btn = e.target.closest('.category-btn');
+            if (!btn || !this.categoryFilter.contains(btn)) return;
+            this.categoryFilter.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.filterTasks();
         });
         this.priorityFilter.addEventListener('change', () => this.filterTasks());
+        if (this.dueFilter) this.dueFilter.addEventListener('change', () => this.filterTasks());
+
+        // View switching
+        if (this.kanbanViewBtn && this.calendarViewBtn) {
+            this.kanbanViewBtn.addEventListener('click', () => {
+                this.showKanban();
+            });
+            this.calendarViewBtn.addEventListener('click', () => {
+                this.showCalendar();
+            });
+        }
     }
 
     // Initialize drag and drop functionality
@@ -131,7 +146,7 @@ class TodoApp {
     }
 
     // Handle task submission
-    handleTaskSubmit(e) {
+    async handleTaskSubmit(e) {
         e.preventDefault();
         
         // Check if we're in edit mode
@@ -146,7 +161,8 @@ class TodoApp {
         const priority = document.getElementById('taskPriority').value;
         const dueDate = document.getElementById('taskDueDate').value;
         const recurrence = document.getElementById('taskRecurrence').value;
-        const attachments = document.getElementById('taskAttachment').files;
+        const files = document.getElementById('taskAttachment').files;
+        const attachments = await this.handleFileUpload(files);
 
         const task = new Task(
             Date.now().toString(),
@@ -156,12 +172,27 @@ class TodoApp {
             priority,
             dueDate,
             recurrence,
-            this.handleFileUpload(attachments)
+            attachments
         );
+        // place new task at end of its column by default
+        const sameStatusTasks = this.tasks.filter(t => t.status === task.status);
+        const maxOrder = sameStatusTasks.length ? Math.max(...sameStatusTasks.map(t => t.orderIndex || 0)) : -1;
+        task.orderIndex = maxOrder + 1;
         
         this.tasks.push(task);
         this.saveTasks();
         this.renderTask(task);
+        // Update calendar events on create
+        if (this.calendar) {
+            this.calendar.addEvent({
+                id: task.id,
+                title: task.title,
+                start: task.dueDate,
+                backgroundColor: this.getPriorityColor(task.priority),
+                borderColor: this.getPriorityColor(task.priority),
+                textColor: '#ffffff'
+            });
+        }
         this.closeModal(this.taskModal);
         this.taskForm.reset();
     }
@@ -200,21 +231,14 @@ class TodoApp {
 
     // Handle file uploads
     handleFileUpload(files) {
-        const attachments = [];
-        if (files) {
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    attachments.push({
-                        name: file.name,
-                        type: file.type,
-                        data: e.target.result
-                    });
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-        return attachments;
+        if (!files || !files.length) return Promise.resolve([]);
+        const readers = Array.from(files).map(file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve({ name: file.name, type: file.type, data: e.target.result });
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        }));
+        return Promise.all(readers);
     }
 
     // Render a task
@@ -260,6 +284,7 @@ class TodoApp {
             const newStatus = taskElement.closest('.task-list').dataset.status;
             const taskId = taskElement.dataset.taskId;
             this.updateTaskStatus(taskId, newStatus);
+            this.persistOrderForStatus(newStatus);
         });
     }
 
@@ -279,22 +304,65 @@ class TodoApp {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
+    // Persist the order of tasks within a status list
+    persistOrderForStatus(status) {
+        const list = document.querySelector(`.task-list[data-status="${status}"]`);
+        if (!list) return;
+        const idsInOrder = Array.from(list.querySelectorAll('.task-card')).map(el => el.dataset.taskId);
+        idsInOrder.forEach((id, index) => {
+            const task = this.tasks.find(t => t.id === id);
+            if (task) task.orderIndex = index;
+        });
+        this.saveTasks();
+    }
+
     // Filter tasks
     filterTasks() {
-        const searchTerm = this.searchInput.value.toLowerCase();
-        const selectedCategory = this.categoryFilter.querySelector('.active').dataset.category;
-        const selectedPriority = this.priorityFilter.value;
-        
+        const searchTerm = (this.searchInput?.value || '').toLowerCase();
+        const activeBtn = this.categoryFilter?.querySelector('.active');
+        const selectedCategory = activeBtn ? activeBtn.dataset.category : 'all';
+        const selectedPriority = this.priorityFilter?.value || 'all';
+        const selectedDue = this.dueFilter?.value || 'all';
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const next7 = new Date(today);
+        next7.setDate(today.getDate() + 7);
+
+        const isWithinDueFilter = (task) => {
+            if (!task.dueDate) return selectedDue === 'noduedate' || selectedDue === 'all';
+            const due = new Date(task.dueDate);
+            const dueDayStart = new Date(due);
+            dueDayStart.setHours(0, 0, 0, 0);
+            switch (selectedDue) {
+                case 'today':
+                    return dueDayStart.getTime() === today.getTime();
+                case 'tomorrow':
+                    return dueDayStart.getTime() === tomorrow.getTime();
+                case 'next7':
+                    return due >= today && due <= next7;
+                case 'overdue':
+                    return due < new Date();
+                case 'noduedate':
+                    return !task.dueDate;
+                default:
+                    return true;
+            }
+        };
+
         this.tasks.forEach(task => {
             const taskElement = document.querySelector(`[data-task-id="${task.id}"]`);
             if (!taskElement) return;
-            
-            const matchesSearch = task.title.toLowerCase().includes(searchTerm) ||
-                                task.description.toLowerCase().includes(searchTerm);
+
+            const matchesSearch = (task.title || '').toLowerCase().includes(searchTerm) ||
+                                  (task.description || '').toLowerCase().includes(searchTerm);
             const matchesCategory = selectedCategory === 'all' || task.category === selectedCategory;
             const matchesPriority = selectedPriority === 'all' || task.priority === selectedPriority;
-            
-            taskElement.style.display = matchesSearch && matchesCategory && matchesPriority ? 'block' : 'none';
+            const matchesDue = isWithinDueFilter(task);
+
+            taskElement.style.display = (matchesSearch && matchesCategory && matchesPriority && matchesDue) ? 'block' : 'none';
         });
     }
 
@@ -357,7 +425,13 @@ class TodoApp {
 
     // Load tasks from localStorage
     loadTasks() {
-        this.tasks.forEach(task => this.renderTask(task));
+        const statuses = ['todo', 'inProgress', 'completed'];
+        statuses.forEach(status => {
+            this.tasks
+                .filter(t => t.status === status)
+                .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))
+                .forEach(task => this.renderTask(task));
+        });
     }
 
     // Modal controls
@@ -367,6 +441,18 @@ class TodoApp {
 
     closeModal(modal) {
         modal.style.display = 'none';
+    }
+
+    // View switching helpers
+    showKanban() {
+        if (this.kanbanView) this.kanbanView.style.display = 'grid';
+        if (this.calendarView) this.calendarView.style.display = 'none';
+    }
+
+    showCalendar() {
+        if (this.kanbanView) this.kanbanView.style.display = 'none';
+        if (this.calendarView) this.calendarView.style.display = 'block';
+        if (this.calendar) this.calendar.render();
     }
 
     // Edit task
@@ -425,6 +511,12 @@ class TodoApp {
             
             // Restore original submit handler
             this.taskForm.onsubmit = originalSubmitHandler;
+
+            // Refresh calendar events after edit
+            if (this.calendar) {
+                this.calendar.removeAllEvents();
+                this.calendar.addEventSource(this.getCalendarEvents());
+            }
         };
     }
 

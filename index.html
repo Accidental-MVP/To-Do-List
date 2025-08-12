@@ -13,12 +13,14 @@
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
 </head>
-<body class="light-theme">
+<body data-theme="light">
     <header>
         <h1>Task Master</h1>
         <div class="header-controls">
             <button id="themeToggle"><i class="fas fa-moon"></i></button>
             <button id="addTaskBtn"><i class="fas fa-plus"></i> New Task</button>
+            <button id="kanbanViewBtn"><i class="fas fa-table-columns"></i> Kanban</button>
+            <button id="calendarViewBtn"><i class="fas fa-calendar"></i> Calendar</button>
         </div>
     </header>
 
@@ -48,11 +50,22 @@
                         <option value="low">Low</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <h4>Due</h4>
+                    <select id="dueFilter">
+                        <option value="all">All</option>
+                        <option value="today">Today</option>
+                        <option value="tomorrow">Tomorrow</option>
+                        <option value="next7">Next 7 Days</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="noduedate">No Due Date</option>
+                    </select>
+                </div>
             </div>
         </aside>
 
         <main class="content">
-            <div class="kanban-board">
+            <div class="kanban-board" id="kanbanView">
                 <div class="kanban-column" id="todoColumn">
                     <h2>To Do</h2>
                     <div class="task-list" data-status="todo"></div>
@@ -66,6 +79,7 @@
                     <div class="task-list" data-status="completed"></div>
                 </div>
             </div>
+            <div id="calendar" style="display:none"></div>
         </main>
     </div>
 
