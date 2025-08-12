@@ -113,9 +113,17 @@ class TodoApp {
         if (this.kanbanViewBtn && this.calendarViewBtn) {
             this.kanbanViewBtn.addEventListener('click', () => {
                 this.showKanban();
+                this.kanbanViewBtn.classList.add('active');
+                this.calendarViewBtn.classList.remove('active');
+                this.kanbanViewBtn.setAttribute('aria-selected', 'true');
+                this.calendarViewBtn.setAttribute('aria-selected', 'false');
             });
             this.calendarViewBtn.addEventListener('click', () => {
                 this.showCalendar();
+                this.calendarViewBtn.classList.add('active');
+                this.kanbanViewBtn.classList.remove('active');
+                this.calendarViewBtn.setAttribute('aria-selected', 'true');
+                this.kanbanViewBtn.setAttribute('aria-selected', 'false');
             });
         }
     }

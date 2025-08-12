@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Todo List</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Include date picker library -->
@@ -17,10 +20,12 @@
     <header>
         <h1>Task Master</h1>
         <div class="header-controls">
-            <button id="themeToggle"><i class="fas fa-moon"></i></button>
+            <button id="themeToggle" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
             <button id="addTaskBtn"><i class="fas fa-plus"></i> New Task</button>
-            <button id="kanbanViewBtn"><i class="fas fa-table-columns"></i> Kanban</button>
-            <button id="calendarViewBtn"><i class="fas fa-calendar"></i> Calendar</button>
+            <div class="segmented-control" role="tablist" aria-label="View selector">
+                <button id="kanbanViewBtn" class="segmented-item active" role="tab" aria-selected="true"><i class="fas fa-table-columns"></i> Kanban</button>
+                <button id="calendarViewBtn" class="segmented-item" role="tab" aria-selected="false"><i class="fas fa-calendar"></i> Calendar</button>
+            </div>
         </div>
     </header>
 

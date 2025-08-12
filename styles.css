@@ -1,27 +1,35 @@
 :root {
-    /* Light theme variables */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f7f7f8;
-    --text-primary: #2d2d2d;
-    --text-secondary: #6e6e80;
-    --accent-color: #10a37f;
-    --border-color: #e5e5e5;
-    --shadow-color: rgba(0, 0, 0, 0.05);
-    --card-bg: #ffffff;
-    --hover-color: #f0f0f0;
+    /* Dark-first professional palette */
+    --bg-primary: #0b1020;
+    --bg-secondary: #0f152b;
+    --surface: #121a36;
+    --card-bg: #0f152b;
+    --text-primary: #ecf1ff;
+    --text-secondary: #9aa8c7;
+    --accent-color: #6ee7b7;
+    --accent-strong: #34d399;
+    --border-color: rgba(255,255,255,0.08);
+    --shadow-color: rgba(0, 0, 0, 0.35);
+    --hover-color: rgba(255,255,255,0.04);
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+    --brand-gradient: linear-gradient(135deg, #22d3ee 0%, #34d399 50%, #60a5fa 100%);
 }
 
-/* Dark theme variables */
-[data-theme="dark"] {
-    --bg-primary: #202123;
-    --bg-secondary: #343541;
-    --text-primary: #ffffff;
-    --text-secondary: #acacbe;
-    --accent-color: #10a37f;
-    --border-color: #4a4b53;
-    --shadow-color: rgba(0, 0, 0, 0.3);
-    --card-bg: #2d2d33;
-    --hover-color: #40414f;
+/* Light theme override */
+[data-theme="light"] {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --surface: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #0b1220;
+    --text-secondary: #5b687a;
+    --accent-color: #0ea5e9;
+    --accent-strong: #0284c7;
+    --border-color: #e5e7eb;
+    --shadow-color: rgba(2, 6, 23, 0.06);
+    --hover-color: #f1f5f9;
 }
 
 * {
@@ -31,16 +39,19 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-primary);
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(1000px 600px at -10% -10%, rgba(52, 211, 153, 0.1), transparent 50%),
+                radial-gradient(900px 500px at 110% -10%, rgba(14, 165, 233, 0.12), transparent 50%),
+                var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background 0.4s ease, color 0.3s ease;
 }
 
 header {
-    background-color: var(--bg-secondary);
-    padding: 1rem 2rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.00));
+    backdrop-filter: blur(10px);
+    padding: 0.9rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -50,7 +61,16 @@ header {
     left: 0;
     right: 0;
     z-index: 1000;
-    box-shadow: 0 2px 10px var(--shadow-color);
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+header h1 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 .header-controls {
@@ -59,22 +79,27 @@ header {
 }
 
 button {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    background-color: var(--accent-color);
-    color: white;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    color: var(--text-primary);
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    display: flex;
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    font-weight: 600;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 6px 16px rgba(0,0,0,0.25);
 }
 
 button:hover {
-    opacity: 0.9;
     transform: translateY(-1px);
+    background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
+}
+
+button:active {
+    transform: translateY(0);
 }
 
 .main-container {
@@ -88,14 +113,15 @@ button:hover {
 }
 
 .sidebar {
-    background-color: var(--bg-secondary);
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px var(--shadow-color);
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    padding: 1.25rem;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    border: 1px solid var(--border-color);
     position: sticky;
     top: 85px;
     height: fit-content;
-    overflow-y: visible;
+    overflow: visible;
 }
 
 /* Custom scrollbar for webkit browsers */
@@ -243,12 +269,14 @@ button:hover {
 }
 
 .kanban-column {
-    background-color: var(--bg-secondary);
-    padding: 1.5rem;
-    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    padding: 1.25rem;
+    border-radius: 14px;
     min-height: 300px;
     display: flex;
     flex-direction: column;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px var(--shadow-color);
 }
 
 .kanban-column h2 {
@@ -263,25 +291,32 @@ button:hover {
     flex-grow: 1;
 }
 
+.task-list.drag-over {
+    outline: 2px dashed var(--accent-color);
+    outline-offset: 6px;
+    border-radius: 12px;
+}
+
 .task-card {
-    background-color: var(--card-bg);
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
     padding: 1.2rem;
     margin-bottom: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px var(--shadow-color);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px var(--shadow-color);
     cursor: move;
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     border: 1px solid var(--border-color);
 }
 
 .task-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px var(--shadow-color);
+    box-shadow: 0 30px 80px var(--shadow-color);
 }
 
 .task-card.dragging {
-    opacity: 0.5;
-    transform: scale(1.02);
+    opacity: 0.6;
+    transform: scale(1.02) rotate(-0.2deg);
+    filter: saturate(1.1);
 }
 
 .priority-badge {
@@ -293,20 +328,9 @@ button:hover {
     display: inline-block;
 }
 
-.priority-high { 
-    background-color: #fde8e8; 
-    color: #e53e3e; 
-}
-
-.priority-medium { 
-    background-color: #fef3c7; 
-    color: #d97706; 
-}
-
-.priority-low { 
-    background-color: #def7ec; 
-    color: #059669; 
-}
+.priority-high { background-color: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+.priority-medium { background-color: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+.priority-low { background-color: rgba(16, 185, 129, 0.18); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
 
 [data-theme="dark"] .priority-high { 
     background-color: rgba(229, 62, 62, 0.2); 
@@ -342,6 +366,7 @@ button:hover {
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     cursor: pointer;
+    border-radius: 10px;
 }
 
 .task-actions button:hover {
@@ -349,15 +374,15 @@ button:hover {
 }
 
 .edit-task-btn:hover {
-    background-color: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
+    background: var(--brand-gradient);
+    color: #0b1020;
+    border-color: transparent;
 }
 
 .delete-task-btn:hover {
-    background-color: #ff4444;
+    background-color: var(--danger);
     color: white;
-    border-color: #ff4444;
+    border-color: transparent;
 }
 
 .modal {
@@ -367,18 +392,19 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background: linear-gradient(180deg, rgba(2,6,23,0.7), rgba(2,6,23,0.92));
+    backdrop-filter: blur(6px);
 }
 
 .modal-content {
-    background-color: var(--bg-primary);
-    margin: 10% auto;
-    padding: 2rem;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 4px 20px var(--shadow-color);
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    margin: 6% auto;
+    padding: 1.5rem;
+    border-radius: 16px;
+    width: 92%;
+    max-width: 680px;
+    box-shadow: 0 40px 100px var(--shadow-color);
+    border: 1px solid var(--border-color);
 }
 
 .close {
@@ -402,16 +428,17 @@ form {
 input, textarea, select {
     padding: 0.8rem 1rem;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--card-bg);
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
     color: var(--text-primary);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset;
 }
 
 input:focus, textarea:focus, select:focus {
     outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.1);
+    border-color: var(--accent-strong);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
 }
 
 /* Responsive Design */
@@ -496,8 +523,9 @@ input:focus, textarea:focus, select:focus {
 
 #calendar {
     height: 100%;
-    background-color: var(--bg-primary);
-    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
 }
 
 /* FullCalendar theme overrides */
@@ -517,14 +545,13 @@ input:focus, textarea:focus, select:focus {
 }
 
 .fc .fc-button {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
+    background: var(--brand-gradient);
+    border-color: transparent;
+    color: #0b1020;
 }
 
 .fc .fc-button:hover {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-    opacity: 0.9;
+    filter: brightness(0.95);
 }
 
 .fc .fc-daygrid-day {
@@ -570,10 +597,11 @@ input:focus, textarea:focus, select:focus {
 
 /* Update the active state of category buttons */
 .category-btn.active {
-    background-color: var(--accent-color);
-    color: white;
-    transform: translateX(5px);
-    box-shadow: 0 2px 5px var(--shadow-color);
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+    color: var(--text-primary);
+    transform: translateX(4px);
+    box-shadow: 0 12px 30px var(--shadow-color);
+    border: 1px solid var(--accent-color);
 }
 
 /* Make the category color indicator more visible when active */
@@ -602,6 +630,29 @@ input:focus, textarea:focus, select:focus {
     margin-left: 0;
     width: 100%;
     overflow-x: hidden;
+}
+
+/* Segmented control for view switching */
+.segmented-control {
+    display: inline-flex;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+}
+.segmented-item {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 0.5rem 0.8rem;
+    border-radius: 10px;
+}
+.segmented-item.active {
+    color: var(--text-primary);
+    background: var(--brand-gradient);
+    border: none;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
 /* Add some responsive adjustments */
