@@ -146,7 +146,7 @@ class TodoApp {
 
     // Initialize date picker
     initializeFlatpickr() {
-        flatpickr("#taskDueDate", {
+        this.duePicker = flatpickr("#taskDueDate", {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
             minDate: "today"
@@ -167,7 +167,8 @@ class TodoApp {
         const description = document.getElementById('taskDescription').value;
         const category = document.getElementById('taskCategory').value;
         const priority = document.getElementById('taskPriority').value;
-        const dueDate = document.getElementById('taskDueDate').value;
+        const dueDateInput = document.getElementById('taskDueDate').value;
+        const dueDate = dueDateInput ? new Date(dueDateInput).toISOString() : '';
         const recurrence = document.getElementById('taskRecurrence').value;
         const files = document.getElementById('taskAttachment').files;
         const attachments = await this.handleFileUpload(files);
@@ -491,7 +492,8 @@ class TodoApp {
             const description = document.getElementById('taskDescription').value;
             const category = document.getElementById('taskCategory').value;
             const priority = document.getElementById('taskPriority').value;
-            const dueDate = document.getElementById('taskDueDate').value;
+            const dueDateInput = document.getElementById('taskDueDate').value;
+            const dueDate = dueDateInput ? new Date(dueDateInput).toISOString() : '';
             const recurrence = document.getElementById('taskRecurrence').value;
             
             // Update task object
@@ -671,19 +673,44 @@ class TodoApp {
         if (!calendarEl) return;
 
         this.calendar = new FullCalendar.Calendar(calendarEl, {
+            plugins: (FullCalendar?.dayGrid) ? undefined : undefined,
             initialView: 'dayGridMonth',
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,dayGridWeek'
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
             height: '100%',
+            selectable: true,
+            editable: true,
             events: this.getCalendarEvents(),
             eventClick: (info) => {
                 const taskId = info.event.id;
                 const task = this.tasks.find(t => t.id === taskId);
                 if (task) {
                     this.editTask(taskId);
+                }
+            },
+            dateClick: (info) => {
+                // Prefill modal with clicked date
+                this.openModal(this.taskModal);
+                if (this.duePicker) {
+                    const date = new Date(info.dateStr);
+                    date.setHours(9, 0, 0, 0);
+                    this.duePicker.setDate(date, true);
+                } else {
+                    document.getElementById('taskDueDate').value = info.dateStr;
+                }
+            },
+            eventDrop: (info) => {
+                const taskId = info.event.id;
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.dueDate = info.event.start?.toISOString() || task.dueDate;
+                    this.saveTasks();
+                    // Update card due-date text
+                    const el = document.querySelector(`[data-task-id="${taskId}"] .due-date`);
+                    if (el) el.textContent = new Date(task.dueDate).toLocaleString();
                 }
             },
             eventDidMount: (info) => {
